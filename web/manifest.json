@@ -1,6 +1,6 @@
 {
-    "name": "qr_code",
-    "short_name": "qr_code",
+    "name": "QRFACIL",
+    "short_name": "QRFACIL",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
