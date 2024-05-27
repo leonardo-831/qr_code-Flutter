@@ -17,8 +17,8 @@ class EventDetailsPage extends StatefulWidget {
 class _EventDetailsPageState extends State<EventDetailsPage> {
   final _formKey = GlobalKey<FormState>();
   String _aluno = '';
-  String _token = '';
-  bool _presence = false;
+  //String _token = '';
+  //int _presence = 0;
   late Future<List<EventSubscription>> _eventSubscriptions;
 
   @override
@@ -42,8 +42,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       EventSubscription newEventSubscription = EventSubscription(
         eventId: widget.event.id!,
         aluno: _aluno,
-        token: _token,
-        presence: _presence,
+        token: '',
         createdAt: currentTime,
         updatedAt: currentTime,
       );
@@ -52,6 +51,13 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       _loadEventSubscriptions();
       _formKey.currentState!.reset();
     }
+  }
+
+  Future<void> _copyToClipboard(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Token copiado para a área de transferência')),
+    );
   }
 
   @override
@@ -124,23 +130,36 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                           ),
                           child: ListTile(
                             title: Text(subscription.aluno),
-                            subtitle: Text(
-                                'Presença: ${subscription.presence ? "Sim" : "Não"}'),
-                            trailing: Container(
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 223, 108, 108),
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.qr_code),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => QRCodeScan()),
-                                  );
-                                },
-                              ),
-                            ),
+                            subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                      onTap: () =>
+                                          _copyToClipboard(subscription.token),
+                                      child:
+                                          Text('Token: ${subscription.token}')),
+                                  Text(
+                                      'Presença: ${subscription.presence == 1 ? "Sim" : "Não"}')
+                                ]),
+                            trailing: subscription.presence == 1
+                                ? Icon(Icons.check_circle, color: Colors.green)
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      color: Color.fromARGB(255, 223, 108, 108),
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.qr_code),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  QRCodeScan()),
+                                        );
+                                      },
+                                    ),
+                                  ),
                           ),
                         );
                       },

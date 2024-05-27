@@ -2,11 +2,13 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../model/event.dart';
 import '../model/event_subscription.dart';
+import 'package:uuid/uuid.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
   static Database? _database;
   static const int _databaseVersion = 3;
+  final Uuid uuid = Uuid();
 
   factory DatabaseService() {
     return _instance;
@@ -82,7 +84,19 @@ class DatabaseService {
   Future<int> insertEventSubscription(
       EventSubscription eventSubscription) async {
     final db = await database;
+    eventSubscription.token = uuid.v4();
     return await db.insert('event_subscription', eventSubscription.toMap());
+  }
+
+  Future<int> updateEventSubscription(EventSubscription eventSubscription) async {
+    final db = await database;
+    eventSubscription.updatedAt = DateTime.now().toIso8601String();
+    return await db.update(
+      'event_subscription',
+      eventSubscription.toMap(),
+      where: 'id = ?',
+      whereArgs: [eventSubscription.id],
+    );
   }
 
   Future<List<Event>> getEvents() async {
@@ -92,6 +106,19 @@ class DatabaseService {
     return List.generate(maps.length, (i) {
       return Event.fromMap(maps[i]);
     });
+  }
+
+  Future<EventSubscription?> getEventSubscriptionById(int id) async {
+    final db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      'event_subscription',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return EventSubscription.fromMap(maps.first);
+    }
+    return null;
   }
 
   Future<List<EventSubscription>> getEventSubscriptions(int eventId) async {

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:qr_code/database/database_service.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +17,7 @@ class _QRCodeScanState extends State<QRCodeScan> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  
+
   @override
   void reassemble() {
     super.reassemble();
@@ -57,7 +59,8 @@ class _QRCodeScanState extends State<QRCodeScan> {
                             child: FutureBuilder(
                               future: controller?.getFlashStatus(),
                               builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data == true? 'Ligado': 'Desligado'}');
+                                return Text(
+                                    'Flash: ${snapshot.data == true ? 'Ligado' : 'Desligado'}');
                               },
                             )),
                       ),
@@ -73,7 +76,7 @@ class _QRCodeScanState extends State<QRCodeScan> {
                               builder: (context, snapshot) {
                                 if (snapshot.data != null) {
                                   return Text(
-                                      'Câmera ${describeEnum(snapshot.data!) == 'back'? 'traseira': 'frontal' }');
+                                      'Câmera ${describeEnum(snapshot.data!) == 'back' ? 'traseira' : 'frontal'}');
                                 } else {
                                   return const Text('Carregando...');
                                 }
@@ -140,10 +143,52 @@ class _QRCodeScanState extends State<QRCodeScan> {
     setState(() {
       this.controller = controller;
     });
-    controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        result = scanData;
-      });
+    controller.scannedDataStream.listen((scanData) async {
+      if (scanData.code != null) {
+        try {
+          final data = jsonDecode(scanData.code!);
+          final id = data['id'];
+          final token = data['token'];
+
+          if (id != null) {
+            final eventSubscription =
+                await DatabaseService().getEventSubscriptionById(id);
+
+            if (eventSubscription != null && eventSubscription.token == token) {
+              eventSubscription.presence = 1;
+              await DatabaseService()
+                  .updateEventSubscription(eventSubscription);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Presença confirmada para ${eventSubscription.aluno}'),
+                    backgroundColor: Color.fromARGB(255, 31, 216, 40)),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Inscrição não encontrada ou token inválido'),
+                    backgroundColor: Color.fromARGB(255, 197, 63, 63)),
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('QR Code inválido'),
+                  backgroundColor: Color.fromARGB(255, 197, 63, 63)),
+            );
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Falha ao tentar ler o QrCode.'),
+                backgroundColor: Color.fromARGB(255, 197, 63, 63)),
+          );
+        } finally {
+          controller.pauseCamera();
+          Navigator.pop(context);
+        }
+      }
     });
   }
 

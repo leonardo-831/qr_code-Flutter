@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   sqflite_common_ffi: any
-  sqflite_common_ffi_web: any
   sqflite: any
   path: any
 
@@ -40,6 +39,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   qr_code_scanner: ^1.0.1
+  uuid: ^3.0.4
 
 dev_dependencies:
   flutter_test:
