@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../database/database_service.dart';
 import '../model/event_subscription.dart';
 import '../model/event.dart';
-import 'QrCode_scan.dart';
+import 'qrcode_scan.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final Event event;
@@ -24,6 +24,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   @override
   void initState() {
     super.initState();
+    _loadEventSubscriptions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _loadEventSubscriptions();
   }
 
@@ -64,7 +70,27 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detalhes do Evento'),
+        title: const Text(
+          'Detalhes do Evento',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.red[800],
+        elevation: 10,
+        shadowColor: Color.fromARGB(255, 251, 85, 85),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -80,7 +106,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               child: Column(
                 children: <Widget>[
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Aluno'),
+                    decoration: InputDecoration(labelText: 'Aluno:'),
                     onSaved: (value) {
                       _aluno = value!;
                     },
@@ -94,6 +120,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _saveEventSubscription,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color.fromARGB(255, 244, 40, 60),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 15),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     child: Text('Salvar Inscrição'),
                   ),
                 ],
@@ -145,11 +181,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                 ? Icon(Icons.check_circle, color: Colors.green)
                                 : Container(
                                     decoration: BoxDecoration(
-                                      color: Color.fromARGB(255, 223, 108, 108),
+                                      color: Color.fromARGB(255, 244, 40, 60),
                                       borderRadius: BorderRadius.circular(25),
                                     ),
                                     child: IconButton(
-                                      icon: const Icon(Icons.qr_code),
+                                      icon: const Icon(Icons.qr_code,
+                                          color: Colors.white),
                                       onPressed: () {
                                         Navigator.push(
                                           context,

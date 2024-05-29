@@ -30,13 +30,31 @@ class _QRCodeScanState extends State<QRCodeScan> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Escanear QR Code',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.red[800],
+        elevation: 10,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Column(
         children: <Widget>[
-          Expanded(flex: 4, child: _buildQrView(context)),
+          Expanded(flex: 3, child: _buildQrView(context)),
           Expanded(
-            flex: 1,
-            child: FittedBox(
-              fit: BoxFit.contain,
+            child: Padding(
+              padding: const EdgeInsets.all(5.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -51,38 +69,36 @@ class _QRCodeScanState extends State<QRCodeScan> {
                     children: <Widget>[
                       Container(
                         margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            await controller?.toggleFlash();
+                            setState(() {});
+                          },
+                          icon: FutureBuilder(
+                            future: controller?.getFlashStatus(),
+                            builder: (context, snapshot) {
+                              return Icon(
+                                snapshot.data == true
+                                    ? Icons.flash_on
+                                    : Icons.flash_off,
+                                color: Colors.white,
+                              );
                             },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Text(
-                                    'Flash: ${snapshot.data == true ? 'Ligado' : 'Desligado'}');
-                              },
-                            )),
+                          ),
+                          label: FutureBuilder(
+                            future: controller?.getFlashStatus(),
+                            builder: (context, snapshot) {
+                              return Text(
+                                'Flash: ${snapshot.data == true ? 'Ligado' : 'Desligado'}',
+                                style: const TextStyle(color: Colors.white),
+                              );
+                            },
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[800],
+                          ),
+                        ),
                       ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  return Text(
-                                      'Câmera ${describeEnum(snapshot.data!) == 'back' ? 'traseira' : 'frontal'}');
-                                } else {
-                                  return const Text('Carregando...');
-                                }
-                              },
-                            )),
-                      )
                     ],
                   ),
                   Row(
@@ -91,22 +107,30 @@ class _QRCodeScanState extends State<QRCodeScan> {
                     children: <Widget>[
                       Container(
                         margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           onPressed: () async {
-                            await controller?.pauseCamera();
+                            await controller?.flipCamera();
+                            setState(() {});
                           },
-                          child: const Text('Pausar',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.resumeCamera();
-                          },
-                          child: const Text('Retomar',
-                              style: TextStyle(fontSize: 20)),
+                          icon: const Icon(Icons.flip_camera_android,
+                              color: Colors.white),
+                          label: FutureBuilder(
+                            future: controller?.getCameraInfo(),
+                            builder: (context, snapshot) {
+                              if (snapshot.data != null) {
+                                return Text(
+                                  'Câmera ${describeEnum(snapshot.data!) == 'back' ? 'traseira' : 'frontal'}',
+                                  style: const TextStyle(color: Colors.white),
+                                );
+                              } else {
+                                return const Text('Carregando...',
+                                    style: TextStyle(color: Colors.white));
+                              }
+                            },
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[800],
+                          ),
                         ),
                       )
                     ],
@@ -123,14 +147,14 @@ class _QRCodeScanState extends State<QRCodeScan> {
   Widget _buildQrView(BuildContext context) {
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
-        ? 200.0
+        ? 300.0
         : 300.0;
 
     return QRView(
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor: Colors.red,
+          borderColor: const Color.fromARGB(255, 198, 40, 40),
           borderRadius: 10,
           borderLength: 30,
           borderWidth: 10,
@@ -161,8 +185,9 @@ class _QRCodeScanState extends State<QRCodeScan> {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text('Presença confirmada para ${eventSubscription.aluno}'),
-                    backgroundColor: Color.fromARGB(255, 31, 216, 40)),
+                    content: Text(
+                        'Presença confirmada para ${eventSubscription.aluno}'),
+                    backgroundColor: const Color.fromARGB(255, 31, 216, 40)),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(

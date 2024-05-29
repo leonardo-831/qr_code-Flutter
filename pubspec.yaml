@@ -77,6 +77,8 @@ flutter:
 
   assets:
     - assets/icons/app_icon.png
+    - assets/images/ciencia_da_computacao.jpg
+    - assets/images/coordenadoria_de_extensao.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

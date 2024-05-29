@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:sqflite/sqflite.dart';
-//import 'package:path/path.dart';
 import '../database/database_service.dart';
 import '../model/event.dart';
 
@@ -33,7 +31,24 @@ class _AddEventPageState extends State<AddEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Criar Evento'),
+        title: const Text(
+          'Criar Eventos',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.red[800],
+        elevation: 10,
+        shadowColor: Color.fromARGB(255, 251, 85, 85),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white,),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,6 +71,17 @@ class _AddEventPageState extends State<AddEventPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveEvent,
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor:
+                      Color.fromARGB(255, 244, 40, 60),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 child: Text('Salvar'),
               ),
             ],
